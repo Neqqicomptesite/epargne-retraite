@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Simulateur d'épargne retraite au Maroc : estimez votre capital, votre économie d'impôt (déduction IR) et votre rente. Outil ODDO Assurances, règles fiscales 2026.">
+<meta name="description" content="Simulateur d'épargne retraite au Maroc : estimez votre capital, votre économie d'impôt (déduction IR) et votre rente, avec le choix du mode de sortie. Outil ODDO Assurances, règles fiscales 2026.">
 <meta name="robots" content="index,follow">
 <!-- Pensez à ajouter votre URL canonique :
-<link rel="canonical" href="https://www.oddo.ma/outils/simulateur-epargne-retraite"> -->
+<link rel="canonical" href="https://simulateur.oddo.ma/"> -->
 <title>Simulateur d'épargne retraite au Maroc | ODDO Assurances</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -69,14 +69,33 @@ details.adv>summary::before{content:"+";display:inline-grid;place-items:center;w
 details.adv[open]>summary::before{content:"\2212"}
 .adv .body{padding-top:12px}
 
+.modebar{display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.mlabel{font-size:12.5px;font-weight:600;color:var(--muted)}
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:3px;gap:3px}
+.seg button{font:inherit;font-size:13.5px;font-weight:600;border:0;background:transparent;color:var(--muted);padding:7px 16px;border-radius:7px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--surface);color:var(--green-ink);box-shadow:var(--shadow)}
+.seg button:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+.mixrow{margin-bottom:12px;padding:12px 14px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.mixrow .hint2{font-weight:400;color:var(--muted);font-size:11.5px}
+
 .hero{padding:20px;background:linear-gradient(135deg,var(--navy),#1b4a7d);color:#fff;border-radius:14px;box-shadow:var(--shadow)}
 .hero .cap{font-size:12.5px;letter-spacing:.03em;opacity:.85}
-.hero .big{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(30px,7vw,46px);line-height:1.02;margin-top:4px;font-variant-numeric:tabular-nums}
+.hero .big{font-family:"Fraunces",serif;font-weight:600;font-size:clamp(28px,6.5vw,44px);line-height:1.04;margin-top:4px;font-variant-numeric:tabular-nums}
 .hero .range{margin-top:9px;font-size:13px;opacity:.9}
 .hero .range b{color:#8fe8bd;font-weight:600}
 .hero .cond{display:inline-flex;align-items:center;gap:7px;margin-top:14px;font-size:12.5px;background:rgba(255,255,255,.12);padding:6px 11px;border-radius:999px}
 .dot{width:8px;height:8px;border-radius:50%;flex:none}
 .dot.ok{background:#56e0a0}.dot.no{background:#e8b24d}
+
+.compare{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+@media (max-width:480px){.compare{grid-template-columns:1fr}}
+.ccell{text-align:left;font:inherit;cursor:pointer;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px}
+.ccell:hover{border-color:var(--green)}
+.ccell.selected{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset}
+.ccell:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.ccell .cm{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.ccell .cv{font-family:"Fraunces",serif;font-size:18px;font-weight:600;margin-top:5px;color:var(--fg);font-variant-numeric:tabular-nums}
+.ccell .cf{font-size:11px;color:var(--muted);margin-top:2px}
 
 .tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
 @media (max-width:420px){.tiles{grid-template-columns:1fr}}
@@ -97,7 +116,7 @@ svg{display:block;width:100%;height:auto}
 .brow:last-child{border-bottom:0}
 .brow .bk{color:var(--muted)}
 .brow .bv{font-weight:600;font-variant-numeric:tabular-nums}
-.brow.info{padding-top:2px;border-bottom:1px solid var(--line)}
+.brow.info{padding-top:2px}
 .brow.info .bk,.brow.info .bv{color:var(--muted);font-weight:400;font-size:12px;font-style:italic}
 .brow.total .bk{color:var(--fg);font-weight:700}
 .brow.total .bv{color:var(--green-ink);font-weight:700}
@@ -213,11 +232,43 @@ svg{display:block;width:100%;height:auto}
     </form>
 
     <div>
+      <div class="modebar">
+        <span class="mlabel">Mode de sortie</span>
+        <div class="seg" id="seg" role="group" aria-label="Mode de sortie">
+          <button type="button" data-mode="capital" aria-pressed="true">Capital</button>
+          <button type="button" data-mode="mix" aria-pressed="false">Mixte</button>
+          <button type="button" data-mode="rente" aria-pressed="false">Rente</button>
+        </div>
+      </div>
+
+      <div class="mixrow" id="mixrow" hidden>
+        <label for="mix">Part versée en capital <span class="val"><span id="mixV">50</span> %</span><span class="hint2" id="mixRest">reste en rente</span></label>
+        <input type="range" id="mix" min="0" max="100" step="5" value="50">
+      </div>
+
       <div class="hero">
-        <div class="cap">Capital net estimé à la sortie (sortie en capital)</div>
+        <div class="cap" id="heroCap">—</div>
         <div class="big num" id="heroBig">—</div>
-        <div class="range" id="heroRange"></div>
+        <div class="range" id="heroSub"></div>
         <div class="cond" id="condBadge"><span class="dot ok"></span><span id="condText"></span></div>
+      </div>
+
+      <div class="compare" id="compare">
+        <button type="button" class="ccell selected" data-mode="capital">
+          <div class="cm">100 % Capital</div>
+          <div class="cv num" id="cCap">—</div>
+          <div class="cf">net, en une fois</div>
+        </button>
+        <button type="button" class="ccell" data-mode="mix">
+          <div class="cm">Mixte</div>
+          <div class="cv num" id="cMix">—</div>
+          <div class="cf" id="cMixF">capital + rente</div>
+        </button>
+        <button type="button" class="ccell" data-mode="rente">
+          <div class="cm">100 % Rente</div>
+          <div class="cv num" id="cRente">—</div>
+          <div class="cf">net /mois, à vie</div>
+        </button>
       </div>
 
       <div class="tiles">
@@ -232,9 +283,9 @@ svg{display:block;width:100%;height:auto}
           <div class="foot">cotisations − économie d'impôt</div>
         </div>
         <div class="tile">
-          <div class="k">Rente nette mensuelle</div>
-          <div class="v num" id="tRente">—</div>
-          <div class="foot">si sortie 100 % en rente</div>
+          <div class="k">Capital brut à la sortie</div>
+          <div class="v num" id="tBrut">—</div>
+          <div class="foot">avant fiscalité de sortie</div>
         </div>
         <div class="tile" id="empTile">
           <div class="k">Coût net employeur</div>
@@ -262,7 +313,7 @@ svg{display:block;width:100%;height:auto}
         <b>Estimation pédagogique et non contractuelle.</b> Le rendement n'est pas garanti : il dépend de la performance du contrat. Les montants définitifs figurent au devis et dans les conditions particulières de l'assureur.
         <ul>
           <li>Règles fiscales modélisées : Maroc, en vigueur 2026 (barème IR, déduction ≤ 50 % du salaire net imposable, abattement 70 % jusqu'à 168 000 DH puis 40 %, étalement du capital sur 4 ans). Avantage fiscal de sortie sous conditions : contrat ≥ 8 ans et sortie ≥ 45 ans.</li>
-          <li>Hypothèses : salaire et rendement constants, versements en fin de mois. Pensions CNSS exonérées d'IR non intégrées.</li>
+          <li>La rente est estimée sur une durée probable ; le coefficient définitif dépend du barème de l'assureur. Pensions CNSS exonérées d'IR non intégrées.</li>
         </ul>
       </div>
 
@@ -295,7 +346,7 @@ const ir=(x,nc)=>Math.max(0,irBrut(x)-Math.min(FISCAL.dedCharge*nc,FISCAL.dedCha
 const abat=b=>FISCAL.abatTx1*Math.min(b,FISCAL.abSeuil)+FISCAL.abatTx2*Math.max(0,b-FISCAL.abSeuil);
 
 function project(p){
-  const rNet=Math.max(0,p.rdt-p.frgest);           // rendement net de frais de gestion
+  const rNet=Math.max(0,p.rdt-p.frgest);
   const rdtM=Math.pow(1+rNet,1/12)-1;
   const facteurAn=rdtM===0?12:((Math.pow(1+rdtM,12)-1)/rdtM);
   let Mprev=0;
@@ -310,7 +361,7 @@ function project(p){
     if(y===1){H=(E+G+p.vi)*p.fracq;M=p.vi*(1-p.fracq)*(1+rNet)+(E+G)*(1-p.fracq)/12*facteurAn;}
     else{H=(E+G)*p.fracq;M=D*(1+rNet)+(E+G)*(1-p.fracq)/12*facteurAn;}
     const interet=M-D-E-G+H;
-    const gestAn=((D+M)/2)*p.frgest;                // coût de gestion estimé (déjà reflété dans rNet)
+    const gestAn=((D+M)/2)*p.frgest;
     const O=p.salaire;
     const P=Math.min((O<=FISCAL.fpSeuil?FISCAL.fpTx1:FISCAL.fpTx2)*O,FISCAL.fpPlaf);
     const Q=FISCAL.txCNSS*Math.min(O,FISCAL.plafCNSS);
@@ -348,7 +399,10 @@ function sortie(capBrut,fracCap,p){
 const $=id=>document.getElementById(id);
 const fmt=n=>Math.round(n).toLocaleString('fr-FR').replace(/ /g,' ');
 const fmtDH=n=>fmt(n)+' DH';
+const fmtK=n=>n>=1000?fmt(n/1000)+' k':fmt(n);
 const pct=n=>n.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2});
+
+let MODE='capital';
 
 function readParams(){
   return {
@@ -402,16 +456,38 @@ function render(){
   const rNet=Math.max(0,p.rdt-p.frgest);
   $('rdtNet').textContent=`soit ${pct(rNet*100)} % net de frais de gestion`;
 
+  const mixPct=+$('mix').value||0;
+  $('mixV').textContent=mixPct;
+  $('mixRest').textContent=`${100-mixPct} % en rente`;
+
   const base=project(p);
   const sCap=sortie(base.capBrut,1,p);
   const sRente=sortie(base.capBrut,0,p);
+  const sMix=sortie(base.capBrut,mixPct/100,p);
 
+  $('cCap').textContent=fmtDH(sCap.capitalNet);
+  $('cRente').textContent=fmtDH(sRente.renteNetteMens)+'/mois';
+  $('cMix').textContent=fmtK(sMix.capitalNet)+' DH';
+  $('cMixF').textContent=`+ ${fmtDH(sMix.renteNetteMens)}/mois · ${mixPct}/${100-mixPct}`;
+
+  const fr=MODE==='rente'?0:(MODE==='mix'?mixPct/100:1);
   const loP={...p,rdt:Math.max(0,p.rdt-0.005)}, hiP={...p,rdt:p.rdt+0.005};
-  const capLo=sortie(project(loP).capBrut,1,loP).capitalNet;
-  const capHi=sortie(project(hiP).capBrut,1,hiP).capitalNet;
+  const capLo=sortie(project(loP).capBrut,fr,loP).capitalNet;
+  const capHi=sortie(project(hiP).capBrut,fr,hiP).capitalNet;
 
-  $('heroBig').textContent=fmtDH(sCap.capitalNet);
-  $('heroRange').innerHTML=`Fourchette selon rendement (${pct((p.rdt-0.005)*100)}–${pct((p.rdt+0.005)*100)} %) : <b>${fmtDH(capLo)}</b> à <b>${fmtDH(capHi)}</b>`;
+  if(MODE==='capital'){
+    $('heroCap').textContent="Capital net estimé à la sortie (100 % capital)";
+    $('heroBig').textContent=fmtDH(sCap.capitalNet);
+    $('heroSub').innerHTML=`Fourchette selon rendement (${pct((p.rdt-0.005)*100)}–${pct((p.rdt+0.005)*100)} %) : <b>${fmtDH(capLo)}</b> à <b>${fmtDH(capHi)}</b>`;
+  }else if(MODE==='rente'){
+    $('heroCap').textContent="Rente nette mensuelle estimée (100 % rente)";
+    $('heroBig').textContent=fmtDH(sRente.renteNetteMens)+' /mois';
+    $('heroSub').innerHTML=`Soit ≈ <b>${fmtDH(sRente.renteNetteMens*12*p.dureeRente)}</b> net perçus sur ~${p.dureeRente} ans de rente`;
+  }else{
+    $('heroCap').textContent=`Sortie mixte — ${mixPct} % capital / ${100-mixPct} % rente`;
+    $('heroBig').textContent=fmtDH(sMix.capitalNet);
+    $('heroSub').innerHTML=`capital net <b>${fmtDH(sMix.capitalNet)}</b> + rente nette <b>${fmtDH(sMix.renteNetteMens)}/mois</b>`;
+  }
 
   const cond=sCap.cond, ageSortie=p.age+p.duree;
   $('condBadge').querySelector('.dot').className='dot '+(cond?'ok':'no');
@@ -421,7 +497,7 @@ function render(){
 
   $('tEco').textContent=fmtDH(base.acc.ecoIR);
   $('tEffort').textContent=fmtDH(base.acc.effort);
-  $('tRente').textContent=fmtDH(sRente.renteNetteMens)+'/mois';
+  $('tBrut').textContent=fmtDH(base.capBrut);
   const hasEmp=base.acc.cotisEmp>0;
   $('empTile').hidden=!hasEmp;
   $('tEmp').textContent=fmtDH(base.acc.coutEmp);
@@ -437,7 +513,17 @@ function render(){
   drawChart(base.rows);
 }
 
+function setMode(m){
+  MODE=m;
+  document.querySelectorAll('#seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.mode===m));
+  document.querySelectorAll('.ccell').forEach(c=>c.classList.toggle('selected',c.dataset.mode===m));
+  $('mixrow').hidden=(m!=='mix');
+  render();
+}
+document.querySelectorAll('#seg button').forEach(b=>b.addEventListener('click',()=>setMode(b.dataset.mode)));
+document.querySelectorAll('.ccell').forEach(c=>c.addEventListener('click',()=>setMode(c.dataset.mode)));
 document.getElementById('form').addEventListener('input',render);
+document.getElementById('mix').addEventListener('input',render);
 render();
 </script>
 
